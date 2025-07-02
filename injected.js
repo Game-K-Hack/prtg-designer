@@ -1,6 +1,6 @@
 (function () {
-    const events = $("body").Events();
-    const origPublish = events.publish;
+
+    let event_is_setted = false;
 
     function design() {
         var trs = document
@@ -17,8 +17,29 @@
         }
     }
 
-    events.publish = function (...args) {
-        if (args.length > 0 && args[0].endsWith(".prtg")) design();
-        return origPublish.apply(this, args);
-    };
+    function set_event() {
+        const events = $("body").Events();
+        const origPublish = events.publish;
+        events.publish = function (...args) {
+            if (args.length > 0 && args[0].endsWith(".prtg")) {
+                try {design();}
+                catch (e) {}
+            }
+            return origPublish.apply(this, args);
+        };
+        event_is_setted = true;
+    }
+
+    function init() {
+        if (!event_is_setted) {
+            let body = document.querySelector("body");
+            if (body == null || body == undefined) {
+                setTimeout(init, 100);
+                return;
+            }
+            set_event();
+        }
+    }
+
+    init();
 })();
